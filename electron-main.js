@@ -9,10 +9,10 @@ function createWindow() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
   
   const mainWindow = new BrowserWindow({
-    width: 420,
-    height: 740,
-    x: width - 440, // position on the right side of the screen
-    y: height - 760, // position near bottom
+    width: 430,
+    height: 780,
+    x: width - 450, // position on the right side of the screen
+    y: Math.max(10, height - 800), // position nicely on screen
     frame: false,    // No window borders or title bar
     transparent: true, // Make the background transparent
     alwaysOnTop: false, // Set to true if you want it always on top of other windows
@@ -23,7 +23,7 @@ function createWindow() {
   });
 
   // Load the Vite dev server
-  mainWindow.loadURL('http://localhost:5173');
+  mainWindow.loadURL('http://localhost:8080');
 }
 
 app.whenReady().then(() => {
