@@ -125,7 +125,7 @@ button { color: inherit; }
 
 .portal-window {
   position: relative;
-  height: 140px;
+  height: 160px;
   margin: 7px 7px 0;
   overflow: hidden;
   border: 1px solid var(--shell-border);
@@ -536,82 +536,48 @@ button { color: inherit; }
   animation: sparkle-twinkle 1.8s infinite ease-in-out alternate;
 }
 
-/* Speech Bubble at Top */
-.top-speech-bubble {
-  position: relative;
-  margin-bottom: 14px;
-  width: 100%;
-  padding: 12px 14px;
-  border-radius: 18px;
-  border: 1px solid var(--shell-border);
-  background: rgba(20, 20, 26, 0.96);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(244, 157, 184, 0.15);
+/* --- Thought Cloud on Top of Rabbit --- */
+.portal-thought-cloud {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(300px, 86%);
+  padding: 9px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(22, 18, 26, 0.88);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35), 0 0 16px rgba(244, 157, 184, 0.25);
   backdrop-filter: blur(20px);
-  animation: appear 220ms ease-out both;
-  z-index: 50;
+  animation: cloud-pop 250ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  z-index: 30;
+  pointer-events: none;
 }
-.top-speech-bubble::after {
+.portal-thought-cloud::after {
   content: "";
   position: absolute;
-  top: -6px;
+  bottom: -5px;
   left: 50%;
   transform: translateX(-50%) rotate(45deg);
-  width: 12px;
-  height: 12px;
-  background: rgba(20, 20, 26, 0.96);
-  border-left: 1px solid var(--shell-border);
-  border-top: 1px solid var(--shell-border);
+  width: 10px;
+  height: 10px;
+  background: rgba(22, 18, 26, 0.88);
+  border-right: 1px solid rgba(255, 255, 255, 0.45);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.45);
 }
-.mascot-bubble-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
-}
-.mascot-name {
-  font-size: 10px;
-  font-weight: 500;
-  color: var(--accent);
-  letter-spacing: 0.05em;
-}
-.mascot-controls {
-  display: flex;
-  gap: 6px;
-}
-.mascot-action-btn {
-  border: 0;
-  background: transparent;
-  color: var(--muted-foreground);
-  font-size: 10px;
-  cursor: pointer;
-  padding: 2px;
-  transition: color 150ms ease, transform 150ms ease;
-}
-.mascot-action-btn:hover {
-  color: var(--foreground);
-  transform: scale(1.15);
-}
-.mascot-bubble-msg {
-  margin: 0 0 8px 0;
-  font-size: 11px;
-  line-height: 1.45;
-  color: var(--foreground);
+.portal-thought-cloud p {
+  margin: 0;
+  font-size: 10.5px;
+  line-height: 1.4;
+  color: #f4f4f5;
+  text-align: center;
   font-weight: 400;
+  letter-spacing: 0.01em;
 }
-.mascot-bubble-bottom {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 9px;
-  color: var(--muted-foreground);
-}
-.mascot-tag {
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 2px 7px;
-  background: var(--muted);
-  color: var(--accent);
-  font-size: 8px;
+
+@keyframes cloud-pop {
+  0% { opacity: 0; transform: translate(-50%, 6px) scale(0.92); }
+  100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
 }
 
 @keyframes mascot-idle {

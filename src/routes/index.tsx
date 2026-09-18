@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type Goal = "dsa" | "placement" | "midsem" | "internship" | "free";
 
@@ -255,8 +255,21 @@ function Pulse() {
     return list;
   }, [currentTask, currentBlock]);
 
+  const hideTimeoutRef = useRef<number | null>(null);
+
   function cycleNudge() {
     setNudgeIndex((prev) => (prev + 1) % palakNudges.length);
+  }
+
+  function triggerMascotThought() {
+    cycleNudge();
+    setShowMascotBubble(true);
+    if (hideTimeoutRef.current) {
+      window.clearTimeout(hideTimeoutRef.current);
+    }
+    hideTimeoutRef.current = window.setTimeout(() => {
+      setShowMascotBubble(false);
+    }, 3200);
   }
 
   const currentNudge = palakNudges[nudgeIndex % palakNudges.length];
@@ -339,20 +352,25 @@ function Pulse() {
       <section className="pulse-shell" aria-label="pulse daily planner">
         <div className="portal-window" aria-hidden="false">
           <div className="portal-glow" />
+
+          {showMascotBubble && (
+            <div
+              className="portal-thought-cloud"
+              role="dialog"
+              aria-label="Miso thought"
+            >
+              <p>{currentNudge}</p>
+            </div>
+          )}
+
           <div
             className="portal-mascot-wrapper"
-            onMouseEnter={() => {
-              cycleNudge();
-              setShowMascotBubble(true);
-            }}
+            onMouseEnter={triggerMascotThought}
           >
             <button
               type="button"
               className="mascot-btn portal-mascot-btn"
-              onClick={() => {
-                cycleNudge();
-                setShowMascotBubble((prev) => !prev);
-              }}
+              onClick={triggerMascotThought}
               title="hover or tap for today's thought ✦"
               aria-label="Companion note for Palak"
             >
@@ -378,41 +396,6 @@ function Pulse() {
         </div>
 
         <div className="pulse-content">
-          {showMascotBubble && (
-            <div
-              className="mascot-speech-bubble top-speech-bubble"
-              role="dialog"
-              aria-label="Mascot note for Palak"
-              onMouseEnter={() => setShowMascotBubble(true)}
-            >
-              <div className="mascot-bubble-top">
-                <span className="mascot-name">miso 🐰 · note for palak</span>
-                <div className="mascot-controls">
-                  <button
-                    type="button"
-                    className="mascot-action-btn"
-                    onClick={() => cycleNudge()}
-                    title="next thought →"
-                  >
-                    ↻ next
-                  </button>
-                  <button
-                    type="button"
-                    className="mascot-action-btn"
-                    onClick={() => setShowMascotBubble(false)}
-                    title="close"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </div>
-              <p className="mascot-bubble-msg">{currentNudge}</p>
-              <div className="mascot-bubble-bottom">
-                <span className="mascot-tag">{currentBlock?.label ?? "calm"}</span>
-                <span className="mascot-progress-hint">{completion}% done today ✦</span>
-              </div>
-            </div>
-          )}
           <header className="pulse-header">
             <h1>pulse</h1>
             <time>{dateLabel}</time>
