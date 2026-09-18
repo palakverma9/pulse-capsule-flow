@@ -25,29 +25,29 @@
 }
 
 :root {
-  --background: #faf6f5;
-  --foreground: #2d2427;
-  --card: rgba(255, 255, 255, 0.72);
-  --card-foreground: #2d2427;
-  --primary: #df7395;
+  --background: #09090b;
+  --foreground: #f4f4f5;
+  --card: rgba(255, 255, 255, 0.06);
+  --card-foreground: #f4f4f5;
+  --primary: oklch(0.72 0.14 352);
   --primary-foreground: #ffffff;
-  --secondary: rgba(255, 245, 248, 0.85);
-  --secondary-foreground: #2d2427;
-  --muted: rgba(255, 240, 244, 0.70);
-  --muted-foreground: #8e7c82;
-  --accent: #df7395;
+  --secondary: rgba(255, 255, 255, 0.08);
+  --secondary-foreground: #f4f4f5;
+  --muted: rgba(255, 255, 255, 0.06);
+  --muted-foreground: #a1a1aa;
+  --accent: oklch(0.72 0.14 352);
   --accent-foreground: #ffffff;
-  --border: rgba(225, 140, 170, 0.25);
-  --input: rgba(225, 140, 170, 0.35);
-  --ring: rgba(223, 115, 149, 0.35);
-  --shell: rgba(255, 250, 249, 0.88);
-  --shell-border: rgba(255, 255, 255, 0.95);
-  --rose-glow: rgba(248, 180, 202, 0.88);
-  --pink-glow: rgba(253, 215, 224, 0.88);
-  --peach-glow: rgba(254, 229, 222, 0.85);
-  --portal-deep: #e886a8;
-  --portal-light: #fde4ea;
-  --shadow-shell: 0 20px 60px rgba(180, 110, 140, 0.20), 0 4px 15px rgba(0, 0, 0, 0.04);
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.2);
+  --ring: oklch(0.72 0.14 352 / 50%);
+  --shell: rgba(16, 16, 22, 0.84);
+  --shell-border: rgba(255, 255, 255, 0.14);
+  --rose-glow: oklch(0.66 0.17 352 / 80%);
+  --pink-glow: oklch(0.72 0.14 18 / 80%);
+  --peach-glow: oklch(0.78 0.11 26 / 75%);
+  --portal-deep: oklch(0.52 0.19 352);
+  --portal-light: oklch(0.82 0.12 25);
+  --shadow-shell: 0 30px 80px rgba(0, 0, 0, 0.65), 0 0 50px rgba(225, 120, 160, 0.18);
 }
 
 * {
@@ -390,8 +390,8 @@ button { color: inherit; }
   outline: none;
 }
 .add-task-row select option {
-  background-color: #ffffff;
-  color: #2d2427;
+  background-color: #18181b;
+  color: #f4f4f5;
 }
 .add-task-row select:focus { outline: 2px solid var(--ring); }
 
