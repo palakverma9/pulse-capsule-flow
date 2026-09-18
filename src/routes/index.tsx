@@ -363,20 +363,58 @@ function Pulse() {
               )}
 
               <div className="task-list">
-                {selectedBlock.tasks.map((task) => (
-                  <div key={task.id} className={`task-row ${task.done ? "task-row-done" : ""}`}>
-                    <button
-                      type="button"
-                      className="task-toggle"
-                      onClick={() => toggleTask(selectedBlock.id, task.id)}
-                      aria-label={`${task.done ? "mark undone" : "mark done"}: ${task.text}`}
-                    >
-                      {task.done ? "●" : "○"}
-                    </button>
-                    <span className="task-name">{task.text}</span>
-                    <span className="goal-tag">{task.goal}</span>
-                  </div>
-                ))}
+                {selectedBlock.tasks.filter((task) => !task.done).length === 0 && (
+                  <p className="empty-state">nothing pending here ✦</p>
+                )}
+                {selectedBlock.tasks
+                  .filter((task) => !task.done)
+                  .map((task) => (
+                    <div key={task.id} className="task-row">
+                      <button
+                        type="button"
+                        className="task-toggle"
+                        onClick={() => toggleTask(selectedBlock.id, task.id)}
+                        aria-label={`mark done: ${task.text}`}
+                      >
+                        ○
+                      </button>
+                      {editingTaskId === task.id ? (
+                        <input
+                          className="task-edit-input"
+                          value={editingTaskText}
+                          autoFocus
+                          onChange={(event) => setEditingTaskText(event.target.value.toLowerCase())}
+                          onBlur={() => saveEditingTask(selectedBlock.id)}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter") saveEditingTask(selectedBlock.id);
+                            if (event.key === "Escape") setEditingTaskId(null);
+                          }}
+                          aria-label="edit task"
+                        />
+                      ) : (
+                        <span className="task-name">{task.text}</span>
+                      )}
+                      <span className="task-row-actions">
+                        <span className="goal-tag">{task.goal}</span>
+                        <button
+                          type="button"
+                          className="task-icon-button"
+                          onClick={() => startEditingTask(task.id, task.text)}
+                          aria-label={`edit ${task.text}`}
+                        >
+                          ✎
+                        </button>
+                        <button
+                          type="button"
+                          className="task-icon-button"
+                          onClick={() => deleteTask(selectedBlock.id, task.id)}
+                          aria-label={`delete ${task.text}`}
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    </div>
+                  ))}
               </div>
 
               <form
