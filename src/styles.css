@@ -444,6 +444,188 @@ button { color: inherit; }
   color: var(--foreground);
 }
 
+/* --- Notification / Alert Bar --- */
+.pulse-alert-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 7px 12px;
+  border: 1px solid var(--shell-border);
+  border-radius: 999px;
+  background: var(--card);
+  backdrop-filter: blur(14px);
+  cursor: pointer;
+  transition: background-color 200ms ease, transform 150ms ease;
+}
+.pulse-alert-bar:hover {
+  background: rgba(255, 255, 255, 0.09);
+  transform: translateY(-1px);
+}
+.alert-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+.alert-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #a1a1aa;
+  flex-shrink: 0;
+  transition: background-color 300ms ease;
+}
+.alert-pulse-active {
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulse-ring 2s infinite ease-in-out;
+}
+.alert-text {
+  font-size: 10px;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.alert-pill {
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--muted);
+  color: var(--foreground);
+  flex-shrink: 0;
+}
+
+/* --- Mascot & Companion --- */
+.mascot-section {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+  padding-top: 4px;
+}
+.mascot-btn {
+  position: relative;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 200ms ease;
+}
+.mascot-btn:hover {
+  transform: scale(1.1) translateY(-2px);
+}
+.mascot-svg {
+  width: 46px;
+  height: 46px;
+  filter: drop-shadow(0 4px 12px rgba(224, 122, 156, 0.4));
+  animation: mascot-idle 3.5s ease-in-out infinite alternate;
+}
+.mascot-sparkle {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  font-size: 9px;
+  color: var(--accent);
+  animation: sparkle-twinkle 1.8s infinite ease-in-out alternate;
+}
+
+/* Speech Bubble */
+.mascot-speech-bubble {
+  position: absolute;
+  bottom: 56px;
+  right: 0;
+  width: min(290px, 85vw);
+  padding: 12px 14px;
+  border-radius: 18px;
+  border: 1px solid var(--shell-border);
+  background: rgba(20, 20, 26, 0.96);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(244, 157, 184, 0.15);
+  backdrop-filter: blur(20px);
+  animation: appear 220ms ease-out both;
+  z-index: 50;
+}
+.mascot-speech-bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  right: 18px;
+  width: 12px;
+  height: 12px;
+  background: rgba(20, 20, 26, 0.96);
+  border-right: 1px solid var(--shell-border);
+  border-bottom: 1px solid var(--shell-border);
+  transform: rotate(45deg);
+}
+.mascot-bubble-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.mascot-name {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+}
+.mascot-controls {
+  display: flex;
+  gap: 6px;
+}
+.mascot-action-btn {
+  border: 0;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 10px;
+  cursor: pointer;
+  padding: 2px;
+  transition: color 150ms ease, transform 150ms ease;
+}
+.mascot-action-btn:hover {
+  color: var(--foreground);
+  transform: scale(1.15);
+}
+.mascot-bubble-msg {
+  margin: 0 0 8px 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--foreground);
+  font-weight: 400;
+}
+.mascot-bubble-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 9px;
+  color: var(--muted-foreground);
+}
+.mascot-tag {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px 7px;
+  background: var(--muted);
+  color: var(--accent);
+  font-size: 8px;
+}
+
+@keyframes mascot-idle {
+  0% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-3px) rotate(-2deg); }
+  100% { transform: translateY(0) rotate(2deg); }
+}
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+@keyframes sparkle-twinkle {
+  0% { opacity: 0.4; transform: scale(0.8); }
+  100% { opacity: 1; transform: scale(1.2); }
+}
+
 @keyframes appear { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes ambient-drift { 0% { transform: translate3d(-5%, -4%, 0) scale(0.95); } 50% { transform: translate3d(8%, 7%, 0) scale(1.08); } 100% { transform: translate3d(-2%, 12%, 0) scale(1); } }
 @keyframes portal-breathe { from { transform: translate3d(-3%, 4%, 0) scale(0.94) rotate(-3deg); } to { transform: translate3d(5%, -3%, 0) scale(1.08) rotate(4deg); } }

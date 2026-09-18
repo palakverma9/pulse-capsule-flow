@@ -133,6 +133,15 @@ function Pulse() {
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editingTaskText, setEditingTaskText] = useState("");
   const [showArchive, setShowArchive] = useState(false);
+  const [showMascotBubble, setShowMascotBubble] = useState(false);
+  const [lastNotifiedBlockId, setLastNotifiedBlockId] = useState<string | null>(null);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      setNotificationsEnabled(Notification.permission === "granted");
+    }
+  }, []);
 
   useEffect(() => {
     const current = new Date();
@@ -183,7 +192,70 @@ function Pulse() {
     );
   }, [blocks, now]);
 
+  const minutesRemainingInBlock = useMemo(() => {
+    if (!now || !currentBlock) return null;
+    const currentMinute = now.getHours() * 60 + now.getMinutes();
+    const endMinute = minutesFromTime(currentBlock.end);
+    return Math.max(0, endMinute - currentMinute);
+  }, [now, currentBlock]);
+
   const currentTask = currentBlock?.tasks.find((task) => !task.done);
+
+  // Trigger desktop push notification when block starts or changes
+  useEffect(() => {
+    if (!currentBlock || !ready) return;
+    if (currentBlock.id !== lastNotifiedBlockId) {
+      setLastNotifiedBlockId(currentBlock.id);
+      if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+        new Notification(`Pulse ✦ ${currentBlock.label.toUpperCase()} Block Started`, {
+          body: currentTask
+            ? `Top focus: ${currentTask.text}`
+            : `${formatTime(currentBlock.start)}–${formatTime(currentBlock.end)} · You're all clear!`,
+        });
+      }
+    }
+  }, [currentBlock?.id, currentTask?.id, ready, lastNotifiedBlockId]);
+
+  function toggleNotifications() {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      if (Notification.permission === "granted") {
+        new Notification("Pulse ✦ Alerts Already Active", {
+          body: "You'll be alerted whenever your time blocks change.",
+        });
+        setNotificationsEnabled(true);
+      } else {
+        Notification.requestPermission().then((perm) => {
+          setNotificationsEnabled(perm === "granted");
+          if (perm === "granted") {
+            new Notification("Pulse ✦ Alerts Enabled!", {
+              body: "I'll nudge you right on desktop when it's time to switch tasks.",
+            });
+          }
+        });
+      }
+    }
+  }
+
+  function speakAgenda(text: string) {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.95;
+      utterance.pitch = 1.15;
+      window.speechSynthesis.speak(utterance);
+    }
+  }
+
+  const mascotMessage = useMemo(() => {
+    if (!currentBlock) {
+      return "hey palak ✦ no active block right now. take a gentle breath or plan your next move!";
+    }
+    if (!currentTask) {
+      return `yay! all tasks in ${currentBlock.label} are done! proud of you ✦`;
+    }
+    return `hey palak ✦ let's lock in on: "${currentTask.text}". you've got ${minutesRemainingInBlock ?? 0}m left in this block! 🐰`;
+  }, [currentBlock, currentTask, minutesRemainingInBlock]);
+
   const selectedBlock = blocks.find((block) => block.id === selectedId) ?? blocks[0];
   const streak = now ? calculateStreak(completionHistory, now) : 0;
   const dateLabel = now
@@ -269,6 +341,27 @@ function Pulse() {
             <h1>pulse</h1>
             <time>{dateLabel}</time>
           </header>
+
+          <div
+            className="pulse-alert-bar"
+            onClick={toggleNotifications}
+            role="button"
+            tabIndex={0}
+            title="Click to toggle desktop notifications"
+            onKeyDown={(e) => e.key === "Enter" && toggleNotifications()}
+          >
+            <div className="alert-bar-left">
+              <span className={`alert-pulse-dot ${notificationsEnabled ? "alert-pulse-active" : ""}`} />
+              <span className="alert-text">
+                {currentBlock
+                  ? `${minutesRemainingInBlock ?? 0}m left in ${currentBlock.label} · ${currentBlock.tasks.filter((t) => !t.done).length} pending`
+                  : "recharge · no active block"}
+              </span>
+            </div>
+            <span className="alert-pill">
+              {notificationsEnabled ? "🔔 alerts on" : "🔕 alerts off"}
+            </span>
+          </div>
 
           <section className="glass-card right-now" aria-labelledby="right-now-label">
             <p id="right-now-label" className="eyebrow">
@@ -495,6 +588,69 @@ function Pulse() {
               {showArchive ? "hide completed" : `completed · ${archivedTasks.length}`}
             </button>
           </footer>
+
+          <div className="mascot-section">
+            {showMascotBubble && (
+              <div className="mascot-speech-bubble" role="dialog" aria-label="Mascot message">
+                <div className="mascot-bubble-top">
+                  <span className="mascot-name">miso 🐰</span>
+                  <div className="mascot-controls">
+                    <button
+                      type="button"
+                      className="mascot-action-btn"
+                      onClick={() => speakAgenda(mascotMessage)}
+                      title="read aloud"
+                    >
+                      🔊
+                    </button>
+                    <button
+                      type="button"
+                      className="mascot-action-btn"
+                      onClick={() => setShowMascotBubble(false)}
+                      title="close"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+                <p className="mascot-bubble-msg">{mascotMessage}</p>
+                <div className="mascot-bubble-bottom">
+                  <span className="mascot-tag">{currentBlock?.label ?? "calm"}</span>
+                  <span className="mascot-progress-hint">{completion}% done today ✦</span>
+                </div>
+              </div>
+            )}
+
+            <button
+              type="button"
+              className="mascot-btn"
+              onClick={() => {
+                const next = !showMascotBubble;
+                setShowMascotBubble(next);
+                if (next) speakAgenda(mascotMessage);
+              }}
+              title="tap for today's briefing ✦"
+              aria-label="Tap mascot for daily briefing"
+            >
+              <svg className="mascot-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="22" cy="17" rx="6" ry="15" fill="#F49DB8" transform="rotate(-10 22 17)" />
+                <ellipse cx="22" cy="17" rx="3.5" ry="10" fill="#FCE4EC" transform="rotate(-10 22 17)" />
+                <ellipse cx="42" cy="17" rx="6" ry="15" fill="#F49DB8" transform="rotate(10 42 17)" />
+                <ellipse cx="42" cy="17" rx="3.5" ry="10" fill="#FCE4EC" transform="rotate(10 42 17)" />
+                <ellipse cx="32" cy="46" rx="16" ry="13" fill="#FCE4EC" />
+                <circle cx="32" cy="35" r="16" fill="#FFF5F8" />
+                <ellipse cx="22" cy="39" rx="3.5" ry="2" fill="#F06292" opacity="0.65" />
+                <ellipse cx="42" cy="39" rx="3.5" ry="2" fill="#F06292" opacity="0.65" />
+                <circle cx="26" cy="34" r="2.2" fill="#261C20" />
+                <circle cx="25.3" cy="33.3" r="0.8" fill="#FFFFFF" />
+                <circle cx="38" cy="34" r="2.2" fill="#261C20" />
+                <circle cx="37.3" cy="33.3" r="0.8" fill="#FFFFFF" />
+                <path d="M30.8 37.8 C31.4 38.4 32.6 38.4 33.2 37.8 L32 39 Z" fill="#E91E63" />
+                <path d="M30 40 Q32 41.5 34 40" stroke="#E91E63" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+              </svg>
+              <span className="mascot-sparkle">✦</span>
+            </button>
+          </div>
         </div>
       </section>
     </main>
