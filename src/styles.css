@@ -52,12 +52,12 @@
 
 * { box-sizing: border-box; }
 
-html { background: var(--background); }
+html { background: transparent; }
 
 body {
   margin: 0;
   min-width: 320px;
-  background: var(--background);
+  background: transparent;
   color: var(--foreground);
   font-family: "Satoshi", sans-serif;
   font-weight: 300;
@@ -113,6 +113,7 @@ button { color: inherit; }
   border: 1px solid var(--shell-border);
   border-radius: 180px 180px 40px 40px;
   background: var(--muted);
+  -webkit-app-region: drag;
 }
 
 .portal-glow {
