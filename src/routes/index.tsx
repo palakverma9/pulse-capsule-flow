@@ -130,6 +130,9 @@ function Pulse() {
   const [newTask, setNewTask] = useState("");
   const [newGoal, setNewGoal] = useState<Goal>("dsa");
   const [heroLeaving, setHeroLeaving] = useState(false);
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [editingTaskText, setEditingTaskText] = useState("");
+  const [showArchive, setShowArchive] = useState(false);
 
   useEffect(() => {
     const current = new Date();
