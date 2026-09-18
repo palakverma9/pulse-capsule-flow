@@ -545,9 +545,9 @@ button { color: inherit; }
   width: min(300px, 86%);
   padding: 10px 15px;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  background: rgba(255, 250, 252, 0.92);
-  box-shadow: 0 10px 30px rgba(190, 80, 120, 0.25), 0 2px 10px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(22, 18, 26, 0.92);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45), 0 0 16px rgba(244, 157, 184, 0.25);
   backdrop-filter: blur(20px);
   animation: cloud-pop 250ms cubic-bezier(0.16, 1, 0.3, 1) both;
   z-index: 30;
@@ -561,17 +561,17 @@ button { color: inherit; }
   transform: translateX(-50%) rotate(45deg);
   width: 10px;
   height: 10px;
-  background: rgba(255, 250, 252, 0.92);
-  border-right: 1px solid rgba(255, 255, 255, 0.85);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.85);
+  background: rgba(22, 18, 26, 0.92);
+  border-right: 1px solid rgba(255, 255, 255, 0.28);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.28);
 }
 .portal-thought-cloud p {
   margin: 0;
   font-size: 11px;
   line-height: 1.4;
-  color: #2b1f23;
+  color: #f4f4f5;
   text-align: center;
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: 0.01em;
 }
 
