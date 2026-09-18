@@ -443,6 +443,42 @@ function Pulse() {
             </section>
           )}
 
+          {showArchive && (
+            <section className="glass-card archive-card" aria-label="completed tasks">
+              <p className="eyebrow">completed · {archivedTasks.length}</p>
+              {archivedTasks.length === 0 ? (
+                <p className="empty-state">nothing finished yet</p>
+              ) : (
+                <div className="task-list">
+                  {archivedTasks.map(({ task, block }) => (
+                    <div key={task.id} className="task-row task-row-done">
+                      <button
+                        type="button"
+                        className="task-toggle"
+                        onClick={() => toggleTask(block.id, task.id)}
+                        aria-label={`restore ${task.text}`}
+                      >
+                        ●
+                      </button>
+                      <span className="task-name">{task.text}</span>
+                      <span className="task-row-actions">
+                        <span className="goal-tag">{block.label}</span>
+                        <button
+                          type="button"
+                          className="task-icon-button"
+                          onClick={() => deleteTask(block.id, task.id)}
+                          aria-label={`delete ${task.text}`}
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
+
           <footer className="pulse-footer">
             <div className="progress-meta">
               <span>daily rhythm</span>
@@ -450,6 +486,14 @@ function Pulse() {
             </div>
             <progress max="100" value={completion} aria-label={`${completion}% complete`} />
             <p>✦ {streak} {streak === 1 ? "day" : "days"}</p>
+            <button
+              type="button"
+              className="archive-button"
+              onClick={() => setShowArchive((current) => !current)}
+              aria-expanded={showArchive}
+            >
+              {showArchive ? "hide completed" : `completed · ${archivedTasks.length}`}
+            </button>
           </footer>
         </div>
       </section>
