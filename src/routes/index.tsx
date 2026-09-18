@@ -69,6 +69,8 @@ const SAMPLE_BLOCKS: TimeBlock[] = [
   },
 ];
 
+const INITIAL_BLOCK_ID = "dsa-block";
+
 function localDateKey(date = new Date()) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -120,7 +122,7 @@ export const Route = createFileRoute("/")({
 
 function Pulse() {
   const [blocks, setBlocks] = useState<TimeBlock[]>(SAMPLE_BLOCKS);
-  const [selectedId, setSelectedId] = useState(SAMPLE_BLOCKS[0].id);
+  const [selectedId, setSelectedId] = useState(INITIAL_BLOCK_ID);
   const [completionHistory, setCompletionHistory] = useState<Record<string, number>>({});
   const [now, setNow] = useState<Date | null>(null);
   const [ready, setReady] = useState(false);
@@ -138,7 +140,8 @@ function Pulse() {
         const parsed = JSON.parse(stored) as PulseState;
         if (Array.isArray(parsed.blocks) && parsed.blocks.length > 0) {
           setBlocks(parsed.blocks);
-          setSelectedId(parsed.blocks[0].id);
+          const firstStoredBlock = parsed.blocks[0];
+          if (firstStoredBlock) setSelectedId(firstStoredBlock.id);
           setCompletionHistory(parsed.completionHistory ?? {});
         }
       } catch {
