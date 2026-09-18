@@ -371,7 +371,6 @@ function Pulse() {
               type="button"
               className="mascot-btn portal-mascot-btn"
               onClick={triggerMascotThought}
-              title="hover or tap for today's thought ✦"
               aria-label="Companion note for Palak"
             >
               <svg className="mascot-svg portal-mascot-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
