@@ -25,29 +25,29 @@
 }
 
 :root {
-  --background: oklch(0.957 0.015 62);
-  --foreground: oklch(0.205 0 0);
-  --card: oklch(1 0 0 / 25%);
-  --card-foreground: oklch(0.205 0 0);
-  --primary: oklch(0.665 0.12 354);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.97 0.019 29);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(1 0 0 / 35%);
-  --muted-foreground: oklch(0.62 0 0);
-  --accent: oklch(0.665 0.12 354);
-  --accent-foreground: oklch(1 0 0);
-  --border: oklch(1 0 0 / 60%);
-  --input: oklch(0.86 0.025 10);
-  --ring: oklch(0.665 0.12 354 / 45%);
-  --shell: oklch(1 0 0 / 40%);
-  --shell-border: oklch(1 0 0 / 60%);
-  --rose-glow: oklch(0.79 0.1 351 / 68%);
-  --pink-glow: oklch(0.86 0.07 18 / 72%);
-  --peach-glow: oklch(0.9 0.055 26 / 70%);
-  --portal-deep: oklch(0.72 0.13 354);
-  --portal-light: oklch(0.91 0.06 25);
-  --shadow-shell: 0 30px 80px oklch(0.51 0.06 350 / 13%);
+  --background: #09090b;
+  --foreground: #f4f4f5;
+  --card: rgba(255, 255, 255, 0.06);
+  --card-foreground: #f4f4f5;
+  --primary: oklch(0.72 0.14 352);
+  --primary-foreground: #ffffff;
+  --secondary: rgba(255, 255, 255, 0.08);
+  --secondary-foreground: #f4f4f5;
+  --muted: rgba(255, 255, 255, 0.06);
+  --muted-foreground: #a1a1aa;
+  --accent: oklch(0.72 0.14 352);
+  --accent-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.2);
+  --ring: oklch(0.72 0.14 352 / 50%);
+  --shell: rgba(16, 16, 22, 0.84);
+  --shell-border: rgba(255, 255, 255, 0.14);
+  --rose-glow: oklch(0.66 0.17 352 / 80%);
+  --pink-glow: oklch(0.72 0.14 18 / 80%);
+  --peach-glow: oklch(0.78 0.11 26 / 75%);
+  --portal-deep: oklch(0.52 0.19 352);
+  --portal-light: oklch(0.82 0.12 25);
+  --shadow-shell: 0 30px 80px rgba(0, 0, 0, 0.65), 0 0 50px rgba(225, 120, 160, 0.18);
 }
 
 * { box-sizing: border-box; }
@@ -96,14 +96,16 @@ button { color: inherit; }
 .pulse-shell {
   width: min(100%, 380px);
   min-height: 700px;
-  overflow: hidden;
+  overflow-y: auto;
+  scrollbar-width: none;
   border: 1px solid var(--shell-border);
   border-radius: 50px;
   background: var(--shell);
   box-shadow: var(--shadow-shell);
-  backdrop-filter: blur(24px) saturate(125%);
+  backdrop-filter: blur(28px) saturate(130%);
   animation: appear 300ms ease-out both;
 }
+.pulse-shell::-webkit-scrollbar { display: none; }
 
 .portal-window {
   position: relative;
@@ -370,6 +372,10 @@ button { color: inherit; }
   color: var(--muted-foreground);
   font-size: 9px;
   outline: none;
+}
+.add-task-row select option {
+  background-color: #18181b;
+  color: #f4f4f5;
 }
 .add-task-row select:focus { outline: 2px solid var(--ring); }
 
