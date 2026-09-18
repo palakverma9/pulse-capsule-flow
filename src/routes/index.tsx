@@ -225,6 +225,34 @@ function Pulse() {
     setNewTask("");
   }
 
+  function deleteTask(blockId: string, taskId: string) {
+    updateBlock(blockId, (block) => ({
+      ...block,
+      tasks: block.tasks.filter((task) => task.id !== taskId),
+    }));
+  }
+
+  function startEditingTask(taskId: string, text: string) {
+    setEditingTaskId(taskId);
+    setEditingTaskText(text);
+  }
+
+  function saveEditingTask(blockId: string) {
+    const text = editingTaskText.trim();
+    if (editingTaskId && text) {
+      updateBlock(blockId, (block) => ({
+        ...block,
+        tasks: block.tasks.map((task) => (task.id === editingTaskId ? { ...task, text } : task)),
+      }));
+    }
+    setEditingTaskId(null);
+    setEditingTaskText("");
+  }
+
+  const archivedTasks = blocks.flatMap((block) =>
+    block.tasks.filter((task) => task.done).map((task) => ({ task, block })),
+  );
+
   return (
     <main className="pulse-page">
       <div className="ambient-orb ambient-orb-one" aria-hidden="true" />
