@@ -498,46 +498,49 @@ button { color: inherit; }
   flex-shrink: 0;
 }
 
-/* --- Mascot & Companion --- */
-.mascot-section {
-  position: relative;
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 14px;
-  padding-top: 4px;
+/* --- Mascot in Top Portal --- */
+.portal-mascot-wrapper {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  -webkit-app-region: no-drag;
 }
-.mascot-btn {
-  position: relative;
+.portal-mascot-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
   background: transparent;
   cursor: pointer;
   padding: 0;
-  transition: transform 200ms ease;
+  transition: transform 250ms ease;
+  -webkit-app-region: no-drag;
 }
-.mascot-btn:hover {
-  transform: scale(1.1) translateY(-2px);
+.portal-mascot-btn:hover {
+  transform: scale(1.15) translateY(-3px);
 }
-.mascot-svg {
-  width: 46px;
-  height: 46px;
-  filter: drop-shadow(0 4px 12px rgba(224, 122, 156, 0.4));
+.portal-mascot-svg {
+  width: 58px;
+  height: 58px;
+  filter: drop-shadow(0 6px 16px rgba(224, 122, 156, 0.45));
   animation: mascot-idle 3.5s ease-in-out infinite alternate;
 }
-.mascot-sparkle {
+.portal-mascot-sparkle {
   position: absolute;
-  top: -2px;
-  right: -2px;
-  font-size: 9px;
+  top: 4px;
+  right: 2px;
+  font-size: 11px;
   color: var(--accent);
   animation: sparkle-twinkle 1.8s infinite ease-in-out alternate;
 }
 
-/* Speech Bubble */
-.mascot-speech-bubble {
-  position: absolute;
-  bottom: 56px;
-  right: 0;
-  width: min(290px, 85vw);
+/* Speech Bubble at Top */
+.top-speech-bubble {
+  position: relative;
+  margin-bottom: 14px;
+  width: 100%;
   padding: 12px 14px;
   border-radius: 18px;
   border: 1px solid var(--shell-border);
@@ -547,17 +550,17 @@ button { color: inherit; }
   animation: appear 220ms ease-out both;
   z-index: 50;
 }
-.mascot-speech-bubble::after {
+.top-speech-bubble::after {
   content: "";
   position: absolute;
-  bottom: -6px;
-  right: 18px;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
   width: 12px;
   height: 12px;
   background: rgba(20, 20, 26, 0.96);
-  border-right: 1px solid var(--shell-border);
-  border-bottom: 1px solid var(--shell-border);
-  transform: rotate(45deg);
+  border-left: 1px solid var(--shell-border);
+  border-top: 1px solid var(--shell-border);
 }
 .mascot-bubble-top {
   display: flex;

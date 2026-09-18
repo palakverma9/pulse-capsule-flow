@@ -337,11 +337,82 @@ function Pulse() {
       <div className="ambient-orb ambient-orb-three" aria-hidden="true" />
 
       <section className="pulse-shell" aria-label="pulse daily planner">
-        <div className="portal-window" aria-hidden="true">
+        <div className="portal-window" aria-hidden="false">
           <div className="portal-glow" />
+          <div
+            className="portal-mascot-wrapper"
+            onMouseEnter={() => {
+              cycleNudge();
+              setShowMascotBubble(true);
+            }}
+          >
+            <button
+              type="button"
+              className="mascot-btn portal-mascot-btn"
+              onClick={() => {
+                cycleNudge();
+                setShowMascotBubble((prev) => !prev);
+              }}
+              title="hover or tap for today's thought ✦"
+              aria-label="Companion note for Palak"
+            >
+              <svg className="mascot-svg portal-mascot-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="22" cy="17" rx="6" ry="15" fill="#F49DB8" transform="rotate(-10 22 17)" />
+                <ellipse cx="22" cy="17" rx="3.5" ry="10" fill="#FCE4EC" transform="rotate(-10 22 17)" />
+                <ellipse cx="42" cy="17" rx="6" ry="15" fill="#F49DB8" transform="rotate(10 42 17)" />
+                <ellipse cx="42" cy="17" rx="3.5" ry="10" fill="#FCE4EC" transform="rotate(10 42 17)" />
+                <ellipse cx="32" cy="46" rx="16" ry="13" fill="#FCE4EC" />
+                <circle cx="32" cy="35" r="16" fill="#FFF5F8" />
+                <ellipse cx="22" cy="39" rx="3.5" ry="2" fill="#F06292" opacity="0.65" />
+                <ellipse cx="42" cy="39" rx="3.5" ry="2" fill="#F06292" opacity="0.65" />
+                <circle cx="26" cy="34" r="2.2" fill="#261C20" />
+                <circle cx="25.3" cy="33.3" r="0.8" fill="#FFFFFF" />
+                <circle cx="38" cy="34" r="2.2" fill="#261C20" />
+                <circle cx="37.3" cy="33.3" r="0.8" fill="#FFFFFF" />
+                <path d="M30.8 37.8 C31.4 38.4 32.6 38.4 33.2 37.8 L32 39 Z" fill="#E91E63" />
+                <path d="M30 40 Q32 41.5 34 40" stroke="#E91E63" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+              </svg>
+              <span className="mascot-sparkle portal-mascot-sparkle">✦</span>
+            </button>
+          </div>
         </div>
 
         <div className="pulse-content">
+          {showMascotBubble && (
+            <div
+              className="mascot-speech-bubble top-speech-bubble"
+              role="dialog"
+              aria-label="Mascot note for Palak"
+              onMouseEnter={() => setShowMascotBubble(true)}
+            >
+              <div className="mascot-bubble-top">
+                <span className="mascot-name">miso 🐰 · note for palak</span>
+                <div className="mascot-controls">
+                  <button
+                    type="button"
+                    className="mascot-action-btn"
+                    onClick={() => cycleNudge()}
+                    title="next thought →"
+                  >
+                    ↻ next
+                  </button>
+                  <button
+                    type="button"
+                    className="mascot-action-btn"
+                    onClick={() => setShowMascotBubble(false)}
+                    title="close"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+              <p className="mascot-bubble-msg">{currentNudge}</p>
+              <div className="mascot-bubble-bottom">
+                <span className="mascot-tag">{currentBlock?.label ?? "calm"}</span>
+                <span className="mascot-progress-hint">{completion}% done today ✦</span>
+              </div>
+            </div>
+          )}
           <header className="pulse-header">
             <h1>pulse</h1>
             <time>{dateLabel}</time>
@@ -593,79 +664,6 @@ function Pulse() {
               {showArchive ? "hide completed" : `completed · ${archivedTasks.length}`}
             </button>
           </footer>
-
-          <div
-            className="mascot-section"
-            onMouseEnter={() => {
-              cycleNudge();
-              setShowMascotBubble(true);
-            }}
-          >
-            {showMascotBubble && (
-              <div
-                className="mascot-speech-bubble"
-                role="dialog"
-                aria-label="Mascot note for Palak"
-                onMouseEnter={() => setShowMascotBubble(true)}
-              >
-                <div className="mascot-bubble-top">
-                  <span className="mascot-name">miso 🐰 · note for palak</span>
-                  <div className="mascot-controls">
-                    <button
-                      type="button"
-                      className="mascot-action-btn"
-                      onClick={() => cycleNudge()}
-                      title="next thought →"
-                    >
-                      ↻ next
-                    </button>
-                    <button
-                      type="button"
-                      className="mascot-action-btn"
-                      onClick={() => setShowMascotBubble(false)}
-                      title="close"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                </div>
-                <p className="mascot-bubble-msg">{currentNudge}</p>
-                <div className="mascot-bubble-bottom">
-                  <span className="mascot-tag">{currentBlock?.label ?? "calm"}</span>
-                  <span className="mascot-progress-hint">{completion}% done today ✦</span>
-                </div>
-              </div>
-            )}
-
-            <button
-              type="button"
-              className="mascot-btn"
-              onClick={() => {
-                cycleNudge();
-                setShowMascotBubble(true);
-              }}
-              title="hover or tap for today's thought ✦"
-              aria-label="Companion note for Palak"
-            >
-              <svg className="mascot-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <ellipse cx="22" cy="17" rx="6" ry="15" fill="#F49DB8" transform="rotate(-10 22 17)" />
-                <ellipse cx="22" cy="17" rx="3.5" ry="10" fill="#FCE4EC" transform="rotate(-10 22 17)" />
-                <ellipse cx="42" cy="17" rx="6" ry="15" fill="#F49DB8" transform="rotate(10 42 17)" />
-                <ellipse cx="42" cy="17" rx="3.5" ry="10" fill="#FCE4EC" transform="rotate(10 42 17)" />
-                <ellipse cx="32" cy="46" rx="16" ry="13" fill="#FCE4EC" />
-                <circle cx="32" cy="35" r="16" fill="#FFF5F8" />
-                <ellipse cx="22" cy="39" rx="3.5" ry="2" fill="#F06292" opacity="0.65" />
-                <ellipse cx="42" cy="39" rx="3.5" ry="2" fill="#F06292" opacity="0.65" />
-                <circle cx="26" cy="34" r="2.2" fill="#261C20" />
-                <circle cx="25.3" cy="33.3" r="0.8" fill="#FFFFFF" />
-                <circle cx="38" cy="34" r="2.2" fill="#261C20" />
-                <circle cx="37.3" cy="33.3" r="0.8" fill="#FFFFFF" />
-                <path d="M30.8 37.8 C31.4 38.4 32.6 38.4 33.2 37.8 L32 39 Z" fill="#E91E63" />
-                <path d="M30 40 Q32 41.5 34 40" stroke="#E91E63" strokeWidth="1.2" strokeLinecap="round" fill="none" />
-              </svg>
-              <span className="mascot-sparkle">✦</span>
-            </button>
-          </div>
         </div>
       </section>
     </main>
