@@ -236,25 +236,30 @@ function Pulse() {
     }
   }
 
-  function speakAgenda(text: string) {
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.95;
-      utterance.pitch = 1.15;
-      window.speechSynthesis.speak(utterance);
-    }
+  const [nudgeIndex, setNudgeIndex] = useState(0);
+
+  const palakNudges = useMemo(() => {
+    const list = [
+      currentTask
+        ? `hey palak ✦ right now: "${currentTask.text}". don't open another tab. let's finish this one bite!`
+        : `all tasks in ${currentBlock?.label ?? "this block"} are clear! proud of you ✦`,
+      "stop planning the plan! you already know what to do. 20 focused minutes beats 4 hours of stress 🐰",
+      "hey palak ✦ don't worry about finishing everything today. just solve 1 problem to break the freeze.",
+      "you got into IITK math & stats. you build AI systems in hours. don't let leetcode intimidate you ✦",
+      "feeling stuck? take a deep breath. you don't have to be perfect, just start.",
+      "october 29 is coming, and your offer is waiting. 1 thoughtful move today gets you closer ✦",
+      "your cpi doesn't define your ceiling — your build speed and grit do. now let's knock out this task 🐰",
+      "action creates motivation, not the other way around. just 15 minutes right now!",
+      "one small win right now saves your sleep tonight. let's finish this so you can sleep peacefully ✦",
+    ];
+    return list;
+  }, [currentTask, currentBlock]);
+
+  function cycleNudge() {
+    setNudgeIndex((prev) => (prev + 1) % palakNudges.length);
   }
 
-  const mascotMessage = useMemo(() => {
-    if (!currentBlock) {
-      return "hey palak ✦ no active block right now. take a gentle breath or plan your next move!";
-    }
-    if (!currentTask) {
-      return `yay! all tasks in ${currentBlock.label} are done! proud of you ✦`;
-    }
-    return `hey palak ✦ let's lock in on: "${currentTask.text}". you've got ${minutesRemainingInBlock ?? 0}m left in this block! 🐰`;
-  }, [currentBlock, currentTask, minutesRemainingInBlock]);
+  const currentNudge = palakNudges[nudgeIndex % palakNudges.length];
 
   const selectedBlock = blocks.find((block) => block.id === selectedId) ?? blocks[0];
   const streak = now ? calculateStreak(completionHistory, now) : 0;
@@ -589,19 +594,30 @@ function Pulse() {
             </button>
           </footer>
 
-          <div className="mascot-section">
+          <div
+            className="mascot-section"
+            onMouseEnter={() => {
+              cycleNudge();
+              setShowMascotBubble(true);
+            }}
+          >
             {showMascotBubble && (
-              <div className="mascot-speech-bubble" role="dialog" aria-label="Mascot message">
+              <div
+                className="mascot-speech-bubble"
+                role="dialog"
+                aria-label="Mascot note for Palak"
+                onMouseEnter={() => setShowMascotBubble(true)}
+              >
                 <div className="mascot-bubble-top">
-                  <span className="mascot-name">miso 🐰</span>
+                  <span className="mascot-name">miso 🐰 · note for palak</span>
                   <div className="mascot-controls">
                     <button
                       type="button"
                       className="mascot-action-btn"
-                      onClick={() => speakAgenda(mascotMessage)}
-                      title="read aloud"
+                      onClick={() => cycleNudge()}
+                      title="next thought →"
                     >
-                      🔊
+                      ↻ next
                     </button>
                     <button
                       type="button"
@@ -613,7 +629,7 @@ function Pulse() {
                     </button>
                   </div>
                 </div>
-                <p className="mascot-bubble-msg">{mascotMessage}</p>
+                <p className="mascot-bubble-msg">{currentNudge}</p>
                 <div className="mascot-bubble-bottom">
                   <span className="mascot-tag">{currentBlock?.label ?? "calm"}</span>
                   <span className="mascot-progress-hint">{completion}% done today ✦</span>
@@ -625,12 +641,11 @@ function Pulse() {
               type="button"
               className="mascot-btn"
               onClick={() => {
-                const next = !showMascotBubble;
-                setShowMascotBubble(next);
-                if (next) speakAgenda(mascotMessage);
+                cycleNudge();
+                setShowMascotBubble(true);
               }}
-              title="tap for today's briefing ✦"
-              aria-label="Tap mascot for daily briefing"
+              title="hover or tap for today's thought ✦"
+              aria-label="Companion note for Palak"
             >
               <svg className="mascot-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <ellipse cx="22" cy="17" rx="6" ry="15" fill="#F49DB8" transform="rotate(-10 22 17)" />
