@@ -246,6 +246,8 @@ function Pulse() {
   const [showMascotBubble, setShowMascotBubble] = useState(false);
   const [lastNotifiedBlockId, setLastNotifiedBlockId] = useState<string | null>(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [showBrainDump, setShowBrainDump] = useState(false);
+  const [brainDumpText, setBrainDumpText] = useState("");
 
   useEffect(() => {
     if (typeof window !== "undefined" && "Notification" in window) {
@@ -450,6 +452,50 @@ function Pulse() {
     setNewTask("");
   }
 
+  function processBrainDump() {
+    const text = brainDumpText.trim();
+    if (!text || blocks.length === 0) return;
+
+    const items = text
+      .split(/[\n,]+/)
+      .map((s) => s.trim().toLowerCase())
+      .filter((s) => s.length > 0);
+
+    if (items.length === 0) return;
+
+    const updatedBlocks = blocks.map((b) => ({ ...b, tasks: [...b.tasks] }));
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      const { targetBlock, targetGoal } = findTargetBlockForTask(
+        item,
+        "dsa",
+        blocks,
+        currentBlock,
+        selectedBlock,
+      );
+      const blockIndex = updatedBlocks.findIndex((b) => b.id === targetBlock.id);
+      if (blockIndex >= 0) {
+        updatedBlocks[blockIndex].tasks.push({
+          id: `${Date.now()}-${i}-${Math.random().toString(36).slice(2)}`,
+          text: item,
+          goal: targetGoal,
+          done: false,
+        });
+      }
+    }
+
+    setBlocks(updatedBlocks);
+    setBrainDumpText("");
+    setShowBrainDump(false);
+
+    const firstActiveBlock = updatedBlocks.find((b) => b.tasks.some((t) => !t.done));
+    if (firstActiveBlock) {
+      setSelectedId(firstActiveBlock.id);
+      setNewGoal(getGoalForBlock(firstActiveBlock));
+    }
+  }
+
   function deleteTask(blockId: string, taskId: string) {
     updateBlock(blockId, (block) => ({
       ...block,
@@ -534,6 +580,46 @@ function Pulse() {
             <h1>pulse</h1>
             <time>{dateLabel}</time>
           </header>
+
+          {!showBrainDump ? (
+            <button
+              type="button"
+              className="brain-dump-trigger"
+              onClick={() => setShowBrainDump(true)}
+            >
+              plan my day ✦
+            </button>
+          ) : (
+            <section className="glass-card brain-dump-card">
+              <p className="eyebrow">brain dump — type everything, i'll organize ✦</p>
+              <textarea
+                className="brain-dump-textarea"
+                value={brainDumpText}
+                onChange={(e) => setBrainDumpText(e.target.value.toLowerCase())}
+                placeholder={"leetcode two sum\nstudy mth201 chapter 3\ncold email recruiter at stripe\nclarity standup\ngym"}
+                rows={6}
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault();
+                    processBrainDump();
+                  }
+                }}
+              />
+              <div className="brain-dump-actions">
+                <button
+                  type="button"
+                  className="brain-dump-cancel"
+                  onClick={() => { setShowBrainDump(false); setBrainDumpText(""); }}
+                >
+                  cancel
+                </button>
+                <button type="button" className="done-button" onClick={processBrainDump}>
+                  organize my day ✦
+                </button>
+              </div>
+            </section>
+          )}
 
           <div
             className="pulse-alert-bar"

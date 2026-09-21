@@ -444,6 +444,82 @@ button { color: inherit; }
   color: var(--foreground);
 }
 
+/* --- Brain Dump --- */
+.brain-dump-trigger {
+  display: block;
+  width: 100%;
+  margin: 0 0 14px;
+  border: 1px dashed var(--shell-border);
+  border-radius: 16px;
+  padding: 12px 18px;
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-align: center;
+  transition: color 200ms ease, border-color 200ms ease, background-color 200ms ease, transform 200ms ease;
+}
+.brain-dump-trigger:hover {
+  color: var(--foreground);
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.03);
+  transform: translateY(-1px);
+}
+
+.brain-dump-card {
+  margin-bottom: 14px;
+  padding: 14px 16px 12px;
+  animation: appear 200ms ease-out both;
+}
+
+.brain-dump-textarea {
+  display: block;
+  width: 100%;
+  min-height: 130px;
+  border: 1px solid var(--shell-border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--foreground);
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.7;
+  resize: vertical;
+  outline: none;
+  scrollbar-width: none;
+}
+.brain-dump-textarea::-webkit-scrollbar { display: none; }
+.brain-dump-textarea::placeholder {
+  color: var(--muted-foreground);
+  opacity: 0.5;
+}
+.brain-dump-textarea:focus {
+  border-color: var(--accent);
+}
+
+.brain-dump-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.brain-dump-cancel {
+  border: 0;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  font-size: 11px;
+  transition: color 200ms ease;
+}
+.brain-dump-cancel:hover {
+  color: var(--foreground);
+}
+
 /* --- Notification / Alert Bar --- */
 .pulse-alert-bar {
   display: flex;
