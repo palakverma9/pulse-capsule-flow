@@ -26,6 +26,116 @@ type PulseState = {
 const STORAGE_KEY = "pulse-state-v1";
 const GOALS: Goal[] = ["dsa", "placement", "midsem", "internship", "free"];
 
+const GOAL_KEYWORDS: Record<Goal, string[]> = {
+  dsa: [
+    "dsa", "leetcode", "array", "binary", "tree", "graph", "dp", "problem",
+    "sliding window", "two pointer", "heap", "stack", "queue", "recursion",
+    "trie", "sort", "algorithm", "codeforces", "hashmap", "string", "linked list",
+    "greedy", "matrix", "sql", "contest", "neetcode", "striver", "binary search"
+  ],
+  placement: [
+    "apply", "resume", "cold", "dm", "application", "inmobi", "recruiter",
+    "interview", "outreach", "referral", "placement", "job", "cover letter",
+    "portal", "hire", "email", "linkedin", "message", "hr", "oa", "assessment",
+    "shortlist", "role", "offer"
+  ],
+  midsem: [
+    "midsem", "study", "exam", "mth", "chapter", "lecture", "revision",
+    "course", "professor", "notes", "quiz", "assignment", "homework",
+    "math", "stats", "probability", "test", "syllabus", "pyq", "paper", "reading",
+    "sem", "college", "prof", "revise"
+  ],
+  internship: [
+    "internship", "office", "work", "vector search", "embedding", "vaultstack",
+    "client", "pr", "deploy", "sync", "meeting", "feature", "bug", "jira",
+    "codebase", "api", "backend", "frontend", "docker", "pipeline", "prod", "repo"
+  ],
+  free: [
+    "chill", "rest", "break", "walk", "coffee", "lunch", "dinner", "gym", "music", "nap", "tea"
+  ],
+};
+
+function matchesKeyword(text: string, kw: string): boolean {
+  if (kw.length <= 3) {
+    const regex = new RegExp(`\\b${kw}\\b`, "i");
+    return regex.test(text);
+  }
+  return text.toLowerCase().includes(kw.toLowerCase());
+}
+
+function detectGoalFromText(text: string): Goal | null {
+  for (const [goal, keywords] of Object.entries(GOAL_KEYWORDS) as [Goal, string[]][]) {
+    if (keywords.some((kw) => matchesKeyword(text, kw))) {
+      return goal;
+    }
+  }
+  return null;
+}
+
+function getGoalForBlock(block?: TimeBlock): Goal {
+  if (!block) return "dsa";
+  const label = block.label.toLowerCase();
+  const id = block.id.toLowerCase();
+  if (label.includes("apply") || label.includes("placement") || id.includes("apply")) return "placement";
+  if (label.includes("midsem") || label.includes("study") || id.includes("midsem") || id.includes("study")) return "midsem";
+  if (label.includes("intern") || id.includes("intern")) return "internship";
+  if (label.includes("free") || label.includes("break") || label.includes("rest")) return "free";
+  if (label.includes("dsa") || id.includes("dsa")) return "dsa";
+  const firstTask = block.tasks[0];
+  if (firstTask?.goal) return firstTask.goal;
+  return "dsa";
+}
+
+function getBlockForGoal(goal: Goal, allBlocks: TimeBlock[]): TimeBlock | undefined {
+  return allBlocks.find((b) => {
+    const l = b.label.toLowerCase();
+    const id = b.id.toLowerCase();
+    if (goal === "placement") return l.includes("apply") || l.includes("placement") || id.includes("apply");
+    if (goal === "midsem") return l.includes("midsem") || l.includes("study") || id.includes("midsem") || id.includes("study");
+    if (goal === "internship") return l.includes("intern") || id.includes("intern");
+    if (goal === "free") return l.includes("free") || l.includes("break") || l.includes("rest");
+    if (goal === "dsa") return l.includes("dsa") || id.includes("dsa");
+    return l.includes(goal) || id.includes(goal);
+  });
+}
+
+function findTargetBlockForTask(
+  text: string,
+  chosenGoal: Goal,
+  allBlocks: TimeBlock[],
+  activeBlock?: TimeBlock,
+  currentSelectedBlock?: TimeBlock,
+): { targetBlock: TimeBlock; targetGoal: Goal } {
+  const lower = text.toLowerCase();
+
+  // 1. Direct block label mention in task text (e.g. "midsem: pyqs", "apply to stripe", "dsa 2 sum")
+  for (const block of allBlocks) {
+    const labelLower = block.label.toLowerCase();
+    if (labelLower && lower.includes(labelLower)) {
+      return { targetBlock: block, targetGoal: getGoalForBlock(block) };
+    }
+  }
+
+  // 2. Keyword detection from task text (e.g. "leetcode 53" -> dsa, "cold email recruiter" -> placement)
+  const detectedGoal = detectGoalFromText(text);
+  if (detectedGoal) {
+    const matchedBlock = getBlockForGoal(detectedGoal, allBlocks);
+    if (matchedBlock) {
+      return { targetBlock: matchedBlock, targetGoal: detectedGoal };
+    }
+    return { targetBlock: currentSelectedBlock ?? activeBlock ?? allBlocks[0], targetGoal: detectedGoal };
+  }
+
+  // 3. Fallback to chosenGoal if explicitly different from current selected block, else selectedBlock
+  const blockForChosenGoal = getBlockForGoal(chosenGoal, allBlocks);
+  if (blockForChosenGoal && chosenGoal !== getGoalForBlock(currentSelectedBlock)) {
+    return { targetBlock: blockForChosenGoal, targetGoal: chosenGoal };
+  }
+
+  const fallback = currentSelectedBlock ?? activeBlock ?? allBlocks[0];
+  return { targetBlock: fallback, targetGoal: chosenGoal };
+}
+
 const SAMPLE_BLOCKS: TimeBlock[] = [
   {
     id: "dsa-block",
@@ -147,17 +257,33 @@ function Pulse() {
     const current = new Date();
     setNow(current);
     const stored = window.localStorage.getItem(STORAGE_KEY);
+    const currentMinute = current.getHours() * 60 + current.getMinutes();
     if (stored) {
       try {
         const parsed = JSON.parse(stored) as PulseState;
         if (Array.isArray(parsed.blocks) && parsed.blocks.length > 0) {
           setBlocks(parsed.blocks);
-          const firstStoredBlock = parsed.blocks[0];
-          if (firstStoredBlock) setSelectedId(firstStoredBlock.id);
+          const activeBlock = parsed.blocks.find(
+            (block) => currentMinute >= minutesFromTime(block.start) && currentMinute < minutesFromTime(block.end),
+          );
+          const initialBlock = activeBlock ?? parsed.blocks[0];
+          if (initialBlock) {
+            setSelectedId(initialBlock.id);
+            setNewGoal(getGoalForBlock(initialBlock));
+          }
           setCompletionHistory(parsed.completionHistory ?? {});
         }
       } catch {
         window.localStorage.removeItem(STORAGE_KEY);
+      }
+    } else {
+      const activeBlock = SAMPLE_BLOCKS.find(
+        (block) => currentMinute >= minutesFromTime(block.start) && currentMinute < minutesFromTime(block.end),
+      );
+      const initialBlock = activeBlock ?? SAMPLE_BLOCKS[0];
+      if (initialBlock) {
+        setSelectedId(initialBlock.id);
+        setNewGoal(getGoalForBlock(initialBlock));
       }
     }
     setReady(true);
@@ -304,14 +430,23 @@ function Pulse() {
 
   function addTask() {
     const text = newTask.trim();
-    if (!selectedBlock || !text) return;
-    updateBlock(selectedBlock.id, (block) => ({
+    if (!text || blocks.length === 0) return;
+    const { targetBlock, targetGoal } = findTargetBlockForTask(
+      text,
+      newGoal,
+      blocks,
+      currentBlock,
+      selectedBlock,
+    );
+    updateBlock(targetBlock.id, (block) => ({
       ...block,
       tasks: [
         ...block.tasks,
-        { id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, text, goal: newGoal, done: false },
+        { id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, text, goal: targetGoal, done: false },
       ],
     }));
+    setSelectedId(targetBlock.id);
+    setNewGoal(getGoalForBlock(targetBlock));
     setNewTask("");
   }
 
@@ -457,6 +592,7 @@ function Pulse() {
                     } ${selectedBlock?.id === block.id ? "block-pill-selected" : ""}`}
                     onClick={() => {
                       setSelectedId(block.id);
+                      setNewGoal(getGoalForBlock(block));
                       setEditingId((current) => (current === block.id ? null : block.id));
                     }}
                     aria-pressed={selectedBlock?.id === block.id}
@@ -577,13 +713,27 @@ function Pulse() {
               >
                 <input
                   value={newTask}
-                  onChange={(event) => setNewTask(event.target.value.toLowerCase())}
+                  onChange={(event) => {
+                    const val = event.target.value.toLowerCase();
+                    setNewTask(val);
+                    const detected = detectGoalFromText(val);
+                    if (detected) {
+                      setNewGoal(detected);
+                    }
+                  }}
                   placeholder="+ add task"
                   aria-label="add task"
                 />
                 <select
                   value={newGoal}
-                  onChange={(event) => setNewGoal(event.target.value as Goal)}
+                  onChange={(event) => {
+                    const chosen = event.target.value as Goal;
+                    setNewGoal(chosen);
+                    const matchingBlock = getBlockForGoal(chosen, blocks);
+                    if (matchingBlock) {
+                      setSelectedId(matchingBlock.id);
+                    }
+                  }}
                   aria-label="goal tag"
                 >
                   {GOALS.map((goal) => (
