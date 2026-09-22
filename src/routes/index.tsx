@@ -248,6 +248,9 @@ function Pulse() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [showBrainDump, setShowBrainDump] = useState(false);
   const [brainDumpText, setBrainDumpText] = useState("");
+  const [brainDumpPreview, setBrainDumpPreview] = useState<
+    { text: string; blockId: string; blockLabel: string; goal: Goal }[] | null
+  >(null);
 
   useEffect(() => {
     if (typeof window !== "undefined" && "Notification" in window) {
@@ -452,21 +455,21 @@ function Pulse() {
     setNewTask("");
   }
 
-  function processBrainDump() {
+  function parseBrainDumpText(raw: string): string[] {
+    return raw
+      .split(/[\n;]+|\s*,\s*|\s+then\s+|\s+and\s+|\s+also\s+|\s+after that\s+/i)
+      .map((s) => s.replace(/^\s*[\d]+[.)]\s*/, "").replace(/^\s*[-•–]\s*/, "").trim().toLowerCase())
+      .filter((s) => s.length > 0);
+  }
+
+  function previewBrainDump() {
     const text = brainDumpText.trim();
     if (!text || blocks.length === 0) return;
 
-    const items = text
-      .split(/[\n,]+/)
-      .map((s) => s.trim().toLowerCase())
-      .filter((s) => s.length > 0);
-
+    const items = parseBrainDumpText(text);
     if (items.length === 0) return;
 
-    const updatedBlocks = blocks.map((b) => ({ ...b, tasks: [...b.tasks] }));
-
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
+    const preview = items.map((item) => {
       const { targetBlock, targetGoal } = findTargetBlockForTask(
         item,
         "dsa",
@@ -474,12 +477,30 @@ function Pulse() {
         currentBlock,
         selectedBlock,
       );
-      const blockIndex = updatedBlocks.findIndex((b) => b.id === targetBlock.id);
+      return {
+        text: item,
+        blockId: targetBlock.id,
+        blockLabel: `${formatTime(targetBlock.start)}–${formatTime(targetBlock.end)} · ${targetBlock.label}`,
+        goal: targetGoal,
+      };
+    });
+
+    setBrainDumpPreview(preview);
+  }
+
+  function commitBrainDump() {
+    if (!brainDumpPreview || brainDumpPreview.length === 0) return;
+
+    const updatedBlocks = blocks.map((b) => ({ ...b, tasks: [...b.tasks] }));
+
+    for (let i = 0; i < brainDumpPreview.length; i++) {
+      const item = brainDumpPreview[i];
+      const blockIndex = updatedBlocks.findIndex((b) => b.id === item.blockId);
       if (blockIndex >= 0) {
         updatedBlocks[blockIndex].tasks.push({
           id: `${Date.now()}-${i}-${Math.random().toString(36).slice(2)}`,
-          text: item,
-          goal: targetGoal,
+          text: item.text,
+          goal: item.goal,
           done: false,
         });
       }
@@ -487,6 +508,7 @@ function Pulse() {
 
     setBlocks(updatedBlocks);
     setBrainDumpText("");
+    setBrainDumpPreview(null);
     setShowBrainDump(false);
 
     const firstActiveBlock = updatedBlocks.find((b) => b.tasks.some((t) => !t.done));
@@ -494,6 +516,12 @@ function Pulse() {
       setSelectedId(firstActiveBlock.id);
       setNewGoal(getGoalForBlock(firstActiveBlock));
     }
+  }
+
+  function cancelBrainDump() {
+    setShowBrainDump(false);
+    setBrainDumpText("");
+    setBrainDumpPreview(null);
   }
 
   function deleteTask(blockId: string, taskId: string) {
@@ -591,33 +619,70 @@ function Pulse() {
             </button>
           ) : (
             <section className="glass-card brain-dump-card">
-              <p className="eyebrow">brain dump — type everything, i'll organize ✦</p>
-              <textarea
-                className="brain-dump-textarea"
-                value={brainDumpText}
-                onChange={(e) => setBrainDumpText(e.target.value.toLowerCase())}
-                placeholder={"leetcode two sum\nstudy mth201 chapter 3\ncold email recruiter at stripe\nclarity standup\ngym"}
-                rows={6}
-                autoFocus
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-                    e.preventDefault();
-                    processBrainDump();
-                  }
-                }}
-              />
-              <div className="brain-dump-actions">
-                <button
-                  type="button"
-                  className="brain-dump-cancel"
-                  onClick={() => { setShowBrainDump(false); setBrainDumpText(""); }}
-                >
-                  cancel
-                </button>
-                <button type="button" className="done-button" onClick={processBrainDump}>
-                  organize my day ✦
-                </button>
-              </div>
+              {!brainDumpPreview ? (
+                <>
+                  <p className="eyebrow">brain dump — type everything, i'll organize ✦</p>
+                  <textarea
+                    className="brain-dump-textarea"
+                    value={brainDumpText}
+                    onChange={(e) => setBrainDumpText(e.target.value.toLowerCase())}
+                    placeholder={"leetcode two sum\nstudy mth201 chapter 3\ncold email recruiter at stripe\nclarity standup\ngym"}
+                    rows={6}
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                        e.preventDefault();
+                        previewBrainDump();
+                      }
+                    }}
+                  />
+                  <div className="brain-dump-actions">
+                    <button type="button" className="brain-dump-cancel" onClick={cancelBrainDump}>
+                      cancel
+                    </button>
+                    <button type="button" className="done-button" onClick={previewBrainDump}>
+                      organize ✦
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="eyebrow">here's your day ✦</p>
+                  <div className="brain-dump-preview">
+                    {blocks.map((block) => {
+                      const tasksForBlock = brainDumpPreview.filter((t) => t.blockId === block.id);
+                      if (tasksForBlock.length === 0) return null;
+                      return (
+                        <div key={block.id} className="brain-dump-block-group">
+                          <p className="brain-dump-block-label">
+                            <span className="time-text">{formatTime(block.start)}–{formatTime(block.end)}</span>
+                            <span> · {block.label}</span>
+                          </p>
+                          {tasksForBlock.map((task, idx) => (
+                            <div key={idx} className="brain-dump-preview-task">
+                              <span className="brain-dump-arrow">→</span>
+                              <span className="task-name">{task.text}</span>
+                              <span className="goal-tag">{task.goal}</span>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="brain-dump-actions">
+                    <button
+                      type="button"
+                      className="brain-dump-cancel"
+                      onClick={() => setBrainDumpPreview(null)}
+                    >
+                      ← edit
+                    </button>
+                    <button type="button" className="done-button" onClick={commitBrainDump}>
+                      looks good ✦
+                    </button>
+                  </div>
+                </>
+              )}
             </section>
           )}
 
